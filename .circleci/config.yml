@@ -1,0 +1,17 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: fr3akyphantom/phoenix_firmware_dumper:latest
+    steps:
+      - run:
+          name: Initialize
+          command: |
+            pwd
+            cd /home/alpine
+            ls -lAog
+            ./dumper.sh
+workflows:
+  workstation:
+    jobs:
+      - build
