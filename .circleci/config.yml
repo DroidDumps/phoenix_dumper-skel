@@ -1,17 +1,39 @@
 version: 2.1
-jobs:
-  build:
+parameters:
+  fileurl:
+    type: string
+    default: ""
+executors:
+  alpine:
     docker:
       - image: fr3akyphantom/phoenix_firmware_dumper:latest
+        auth:
+          username: fr3akyphantom
+          password: "$DOCKERHUB_TOKEN"
+    working_directory: /home
+jobs:
+  build:
+    executor: alpine
+    environment:
+      FILEURL: << pipeline.parameters.fileurl >>
     steps:
       - run:
-          name: Initialize
+          name: Clone the Dumper first
           command: |
-            pwd
-            cd /home/alpine
-            ls -lAog
-            ./dumper.sh
+            git config --global user.email "$GitHubMail"
+            git config --global user.name "$GitHubName"
+            git clone https://github.com/DroidDumps/phoenix_firmware_dumper /home/phoenix_dumper
+      - run:
+          name: Dump << pipeline.parameters.fileurl >>
+          command: |
+            cd /home/phoenix_dumper
+            echo "$GITHUB_TOKEN" > .github_token
+            echo "$GIT_ORG" > .github_orgname
+            echo "$TG_TOKEN" > .tg_token
+            echo "$CHAT_ID" > .tg_chat
+            ./dumper.sh "$FILEURL"
 workflows:
   workstation:
     jobs:
-      - build
+      - build:
+          context: phoenix-context
