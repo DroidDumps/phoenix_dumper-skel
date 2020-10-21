@@ -1,8 +1,4 @@
 version: 2.1
-parameters:
-  fileurl:
-    type: string
-    default: ""
 executors:
   alpine:
     docker:
@@ -14,24 +10,21 @@ executors:
 jobs:
   build:
     executor: alpine
-    environment:
-      FILEURL: << pipeline.parameters.fileurl >>
     steps:
       - run:
-          name: Clone the Dumper first
+          name: Clone the Dumper
           command: |
             git config --global user.email "$GitHubMail"
             git config --global user.name "$GitHubName"
             git clone https://github.com/DroidDumps/phoenix_firmware_dumper /home/phoenix_dumper
       - run:
-          name: Dump << pipeline.parameters.fileurl >>
+          name: Set Vars
           command: |
             cd /home/phoenix_dumper
             echo "$GITHUB_TOKEN" > .github_token
             echo "$GIT_ORG" > .github_orgname
             echo "$TG_TOKEN" > .tg_token
             echo "$CHAT_ID" > .tg_chat
-            ./dumper.sh "$FILEURL"
 workflows:
   workstation:
     jobs:
